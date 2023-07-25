@@ -6,7 +6,6 @@ import com.neoclan.transactionservice.dto.TransactionResponseDto;
 import com.neoclan.transactionservice.dto.TransferRequest;
 import com.neoclan.transactionservice.service.TransactionServiceImpl;
 import lombok.AllArgsConstructor;
-import org.hibernate.engine.spi.Resolution;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +38,7 @@ public class TransactionController {
     }
 
     @GetMapping("/transaction-by-type")
-    public ResponseEntity<List<TransactionResponseDto>> fetchTransactionByTypeDoneByUser(@RequestParam("accountNumber") String accountNumber, @RequestParam("type") String debitOrCredit){
+    public ResponseEntity<List<TransactionResponseDto>> fetchTransactionsByTypeDoneByUser(@RequestParam("accountNumber") String accountNumber, @RequestParam("type") String debitOrCredit){
         return new ResponseEntity<>(transactionService.fetchCreditOrDebitTransactionByUser(accountNumber, debitOrCredit), HttpStatus.OK);
     }
 

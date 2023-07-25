@@ -17,6 +17,5 @@ public class TransactionResponseDto {
     private TransactionType transactionType;
     private String accountNumber;
     private BigDecimal amount;
-
     private LocalDateTime timePerformed;
 }

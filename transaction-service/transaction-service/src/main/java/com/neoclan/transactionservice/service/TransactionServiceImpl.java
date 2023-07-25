@@ -21,14 +21,12 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Response debitRequest(TransactionRequest transactionRequest) {
-
         //make a call to the IdentityManagementService via the fetchUserByAccountNumber controller to get the user performing the transaction
         //if balance is less than amount, money not sufficient
         //if balance is okay to make debit, subtract amount in the request dto from the balance
         //set new balance and save the user entity
         //call saveTransaction
         //return response saying successful
-
         UserInfo user = retrieveUser(transactionRequest.getAccountNumber());
 
         if (user == null) {
@@ -57,7 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         saveTransaction(transactionDto);
 
-        //publish event that will be handled by the identity management service to update the user with the new userbalance
+        //publish event that will be handled by the identity management service to update the user with the new user balance
 
         return Response.builder()
                 .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
@@ -93,7 +91,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         saveTransaction(transactionDto);
 
-        //publish event that will be handled by the identity management service to update the user with the new userbalance
+        //publish event that will be handled by the identity management service to update the user with the new user balance
 
         return Response.builder()
                 .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
@@ -112,7 +110,7 @@ public class TransactionServiceImpl implements TransactionService {
         //get sending user and receiving user
         //call debitRequest method for sending user and creditRequest method for receiving user
         //based on whether the debitResponse from debitRequest method is successful, creditRequest will then be done
-        //internally, the balance of each individual is updated and response i.e. alerts are sent to both users. Also transaction is saved for both debit and credit.
+        //internally, the balance of each individual is updated and response i.e. alerts are sent to both users. Also, transaction is saved for both debit and credit.
         //this method just returns a customized response 'debited for transfer' to the user being debited.
 
         UserInfo sendingUser = retrieveUser(transferRequest.getSourceAccountNumber());
