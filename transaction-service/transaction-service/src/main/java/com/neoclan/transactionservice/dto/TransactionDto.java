@@ -1,5 +1,6 @@
 package com.neoclan.transactionservice.dto;
 
+import com.neoclan.transactionservice.entity.TransactionType;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class TransactionDto {
-    private String transactionType;
+    private TransactionType transactionType;
     private String accountNumber;
     private BigDecimal amount;
 }

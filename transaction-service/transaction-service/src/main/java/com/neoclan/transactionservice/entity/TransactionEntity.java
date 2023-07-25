@@ -19,7 +19,9 @@ public class TransactionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String transactionId;
-    private String transactionType;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionType transactionType;
     private String accountNumber;
     private BigDecimal amount;
     @CreationTimestamp

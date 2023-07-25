@@ -8,7 +8,7 @@ import com.neoclan.transactionservice.dto.TransferRequest;
 public interface TransactionService {
 
 
-    void saveTransaction (TransactionDto transactionDto);
+//    void saveTransaction (TransactionDto transactionDto);
 
     Response debitRequest(TransactionRequest transactionRequest);
 

@@ -109,9 +109,9 @@ public class UserServiceImpl implements UserService {
                 .responseCode(ResponseUtils.SUCCESS)
                 .responseMessage(ResponseUtils.SUCCESS_MESSAGE)
                 .userData(UserData.builder()
-                        .accountBalance(null)
+                        .accountBalance(user.getAccountBalance())
                         .accountName(user.getFirstName() + " " + user.getOtherName() + " " + user.getLastName())
-                        .accountNumber(accountNumber)
+                        .accountNumber(user.getAccountNumber())
                         .build())
                 .build();
     }
