@@ -1,9 +1,8 @@
 package com.neoclan.transactionservice.service;
 
-import com.neoclan.transactionservice.dto.Response;
-import com.neoclan.transactionservice.dto.TransactionDto;
-import com.neoclan.transactionservice.dto.TransactionRequest;
-import com.neoclan.transactionservice.dto.TransferRequest;
+import com.neoclan.transactionservice.dto.*;
+
+import java.util.List;
 
 public interface TransactionService {
 
@@ -15,4 +14,8 @@ public interface TransactionService {
     Response creditRequest(TransactionRequest transactionRequest);
 
     Response transferRequest(TransferRequest transferRequest);
+
+    List<TransactionResponseDto> fetchTransactionByUser(String accountNumber);
+
+    List<TransactionResponseDto> fetchCreditOrDebitTransactionByUser(String accountNumber, String debitOrCredit);
 }

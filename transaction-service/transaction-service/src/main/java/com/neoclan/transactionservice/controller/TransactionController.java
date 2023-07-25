@@ -2,15 +2,16 @@ package com.neoclan.transactionservice.controller;
 
 import com.neoclan.transactionservice.dto.Response;
 import com.neoclan.transactionservice.dto.TransactionRequest;
+import com.neoclan.transactionservice.dto.TransactionResponseDto;
 import com.neoclan.transactionservice.dto.TransferRequest;
 import com.neoclan.transactionservice.service.TransactionServiceImpl;
 import lombok.AllArgsConstructor;
+import org.hibernate.engine.spi.Resolution;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v2/transaction")
@@ -30,6 +31,16 @@ public class TransactionController {
     @PutMapping("/debit")
     public ResponseEntity<Response> transferRequest(@RequestBody TransferRequest transferRequest){
         return new ResponseEntity<>(transactionService.transferRequest(transferRequest), HttpStatus.OK);
+    }
+
+    @GetMapping("/all-transactions")
+    public ResponseEntity<List<TransactionResponseDto>> fetchAllTransactionsByUser(@RequestParam("accountNumber") String accountNumber){
+        return ResponseEntity.ok(transactionService.fetchTransactionByUser(accountNumber));
+    }
+
+    @GetMapping("/transaction-by-type")
+    public ResponseEntity<List<TransactionResponseDto>> fetchTransactionByTypeDoneByUser(@RequestParam("accountNumber") String accountNumber, @RequestParam("type") String debitOrCredit){
+        return new ResponseEntity<>(transactionService.fetchCreditOrDebitTransactionByUser(accountNumber, debitOrCredit), HttpStatus.OK);
     }
 
 }

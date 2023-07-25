@@ -10,6 +10,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
@@ -133,6 +136,29 @@ public class TransactionServiceImpl implements TransactionService {
                         .accountNumber(sendingUser.getAccountNumber())
                         .build())
                 .build();
+    }
+
+    @Override
+    public List<TransactionResponseDto> fetchTransactionByUser(String accountNumber) {
+        return transactionRepository.findByAccountNumber(accountNumber).stream()
+                .map(transaction -> TransactionResponseDto.builder()
+                        .id(transaction.getTransactionId())
+                        .transactionType(transaction.getTransactionType())
+                        .accountNumber(transaction.getAccountNumber())
+                        .amount(transaction.getAmount())
+                        .timePerformed(transaction.getCreated())
+                        .build()).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TransactionResponseDto> fetchCreditOrDebitTransactionByUser(String accountNumber, String debitOrCredit) {
+        return transactionRepository.findByAccountNumber(accountNumber).stream().filter(transactionEntity -> String.valueOf(transactionEntity.getTransactionType()).equalsIgnoreCase(debitOrCredit)).map(transaction -> TransactionResponseDto.builder()
+                .id(transaction.getTransactionId())
+                .transactionType(transaction.getTransactionType())
+                .accountNumber(transaction.getAccountNumber())
+                .amount(transaction.getAmount())
+                .timePerformed(transaction.getCreated())
+                .build()).collect(Collectors.toList());
     }
 
     private void saveTransaction(TransactionDto transactionDto) {
