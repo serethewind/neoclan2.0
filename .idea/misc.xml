@@ -5,6 +5,7 @@
       <list>
         <option value="$PROJECT_DIR$/service-registry/service-registry/pom.xml" />
         <option value="$PROJECT_DIR$/identity-management/identity-management/pom.xml" />
+        <option value="$PROJECT_DIR$/transaction-service/transaction-service/pom.xml" />
       </list>
     </option>
   </component>
