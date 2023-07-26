@@ -27,7 +27,7 @@ public class TransactionController {
     public ResponseEntity<Response> creditRequest(@RequestBody TransactionRequest transactionRequest){
         return new ResponseEntity<>(transactionService.creditRequest(transactionRequest), HttpStatus.OK);
     }
-    @PutMapping("/debit")
+    @PutMapping("/transfer")
     public ResponseEntity<Response> transferRequest(@RequestBody TransferRequest transferRequest){
         return new ResponseEntity<>(transactionService.transferRequest(transferRequest), HttpStatus.OK);
     }

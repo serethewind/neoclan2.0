@@ -10,10 +10,12 @@
         <module name="transaction-service" />
         <module name="service-registry" />
         <module name="identity-management" />
+        <module name="notification-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="identity-management" target="17" />
+      <module name="notification-service" target="17" />
       <module name="service-registry" target="17" />
       <module name="transaction-service" target="17" />
     </bytecodeTargetLevel>
@@ -21,6 +23,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="identity-management" options="-parameters" />
+      <module name="notification-service" options="-parameters" />
       <module name="service-registry" options="-parameters" />
       <module name="transaction-service" options="-parameters" />
     </option>

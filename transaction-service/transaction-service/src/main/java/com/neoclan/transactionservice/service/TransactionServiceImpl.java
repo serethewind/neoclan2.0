@@ -171,7 +171,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private UserInfo retrieveUser(String accountNumber) {
         Response response = webClientBuilder.build().get()
-                .uri("http://identity-management/api/v2/user/retrieve-accountName",
+                .uri("http://localhost:8082/api/v2/user/retrieve-accountName",
                         uriBuilder -> uriBuilder.queryParam("accountNumber", accountNumber).build())
                 .retrieve()
                 .bodyToMono(Response.class)

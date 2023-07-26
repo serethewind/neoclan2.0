@@ -3,6 +3,7 @@ package com.neoclan.identitymanagement.service;
 import com.neoclan.identitymanagement.dto.Response;
 import com.neoclan.identitymanagement.dto.UserData;
 import com.neoclan.identitymanagement.dto.UserUpdateRequestDto;
+import com.neoclan.identitymanagement.dto.communication.EmailDetails;
 import com.neoclan.identitymanagement.entity.UserEntity;
 import com.neoclan.identitymanagement.repository.UserRepository;
 import com.neoclan.identitymanagement.utils.ResponseUtils;
@@ -115,4 +116,6 @@ public class UserServiceImpl implements UserService {
                         .build())
                 .build();
     }
+
+
 }
