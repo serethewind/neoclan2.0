@@ -30,6 +30,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -101,6 +102,7 @@ public class AuthServiceImpl implements AuthService {
                     .email(userRegisterRequestDto.getEmail())
                     .username(userRegisterRequestDto.getUsername())
                     .password(passwordEncoder.encode(userRegisterRequestDto.getPassword()))
+                    .accountBalance(BigDecimal.ZERO)
                     .accountNumber(ResponseUtils.generateAccountNumber(ResponseUtils.lengthOfAccountNumber))
                     .roles(Collections.singleton(role))
                     .status("ACTIVE")

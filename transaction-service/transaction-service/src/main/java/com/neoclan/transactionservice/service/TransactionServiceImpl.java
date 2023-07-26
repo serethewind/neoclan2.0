@@ -17,8 +17,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
     private TransactionRepository transactionRepository;
-    private WebClient.Builder webClientBuilder;
+//    private WebClient.Builder webClientBuilder;
 
+    private WebClient webClient;
     @Override
     public Response debitRequest(TransactionRequest transactionRequest) {
         //make a call to the IdentityManagementService via the fetchUserByAccountNumber controller to get the user performing the transaction
@@ -170,8 +171,15 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private UserInfo retrieveUser(String accountNumber) {
-        Response response = webClientBuilder.build().get()
-                .uri("http://localhost:8082/api/v2/user/retrieve-accountName",
+//        Response response = webClientBuilder.build().get()
+//                .uri("http://localhost:8082/api/v2/user/retrieve-accountName",
+//                        uriBuilder -> uriBuilder.queryParam("accountNumber", accountNumber).build())
+//                .retrieve()
+//                .bodyToMono(Response.class)
+//                .block();
+
+        Response response = webClient.put()
+                .uri("http://localhost:8081/api/v2/user/retrieve-accountName",
                         uriBuilder -> uriBuilder.queryParam("accountNumber", accountNumber).build())
                 .retrieve()
                 .bodyToMono(Response.class)
