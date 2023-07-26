@@ -34,7 +34,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public Response sendSimpleMessage(EmailDetails emailDetails) {
+    public String sendSimpleMessage(EmailDetails emailDetails) {
 
         try {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -43,18 +43,22 @@ public class EmailServiceImpl implements EmailService {
             mailMessage.setSubject(emailDetails.getSubject());
             mailMessage.setText(emailDetails.getMessage());
 
-           EmailEntity email = modelMapper.map(mailMessage, EmailEntity.class);
+           EmailEntity email = EmailEntity.builder()
+                   .message(mailMessage.getText())
+                   .subject(mailMessage.getSubject())
+                   .attachment(null)
+                   .build();
            emailRepository.save(email);
 
             javaMailSender.send(mailMessage);
-            return Response.builder().response("Mail sent successfully").build();
+            return "Mail sent successfully";
         } catch (MailException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Response sendMessageWithAttachment(EmailDetails emailDetails) {
+    public String sendMessageWithAttachment(EmailDetails emailDetails) {
         try {
             //first tap into javaMailSender.createMimeMessage() to create Mime Message
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -72,7 +76,7 @@ public class EmailServiceImpl implements EmailService {
 
             //tap into javaMailSender to send message
             javaMailSender.send(mimeMessage);
-            return Response.builder().response("Mail sent successfully").build();
+            return "Mail sent successfully";
 
         } catch (MessagingException e) {
             throw new RuntimeException(e);

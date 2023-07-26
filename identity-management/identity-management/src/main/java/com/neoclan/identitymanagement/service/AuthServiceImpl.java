@@ -88,7 +88,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
     public Response registerUser(UserRegisterRequestDto userRegisterRequestDto) {
         boolean isExist = userRepository.existsByEmail(userRegisterRequestDto.getEmail());
         if (isExist) {
@@ -117,7 +116,8 @@ public class AuthServiceImpl implements AuthService {
                     .message("Congratulations! Your account has been successfully created! Kindly find your details below: \n" + accountDetails)
                     .build();
 
-            EmailResponseDto response = sendSimpleMail(emailDetails); //returns an object of string which says 'message successfully delivered'
+//            String response = sendSimpleMail(emailDetails);
+            //returns an object of string which says 'message successfully delivered'
 
             return Response.builder().responseCode(ResponseUtils.SUCCESS).responseMessage(ResponseUtils.USER_REGISTERED_SUCCESS).userData(UserData.builder()
                             .accountBalance(user.getAccountBalance())
@@ -139,39 +139,33 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.saveAll(tokenEntityList);
     }
 
-    private EmailResponseDto sendSimpleMail(EmailDetails emailDetails) {
+    private String sendSimpleMail(EmailDetails emailDetails) {
 
 //        EmailResponseDto response = webClientBuilder.build().post()
-//                .uri("http://localhost:8083/api/v2/email/simpleMessage", emailDetails)
-//                .contentType(MediaType.APPLICATION_JSON)
+//                 .uri("http://localhost:8083/api/v2/email/simpleMessage")
+//                .body(BodyInserters.fromValue(emailDetails))
 //                .retrieve()
 //                .bodyToMono(EmailResponseDto.class)
 //                .block();
 
-//        EmailResponseDto response = webClientBuilder.post()
-//                .uri("http://localhost:8083/api/v2/email/simpleMessage", emailDetails)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .retrieve()
-//                .bodyToMono(EmailResponseDto.class)
-//                .block();
 
-        EmailResponseDto response = webClientBuilder.post()
+        String response = webClientBuilder.post()
                 .uri("http://localhost:8083/api/v2/email/simpleMessage")
                 .body(BodyInserters.fromValue(emailDetails))
                 .retrieve()
-                .bodyToMono(EmailResponseDto.class)
+                .bodyToMono(String.class)
                 .block();
 
         return response;
     }
 
-    private EmailResponseDto sendSimpleMailWithAttachment(EmailDetails emailDetails) {
+    private String sendSimpleMailWithAttachment(EmailDetails emailDetails) {
 
-        EmailResponseDto response = webClientBuilder.post()
-                .uri("http://localhost:8083/api/v2/email/message", emailDetails)
-                .contentType(MediaType.APPLICATION_JSON)
+        String response = webClientBuilder.post()
+                .uri("http://localhost:8083/api/v2/email/message")
+                .body(BodyInserters.fromValue(emailDetails))
                 .retrieve()
-                .bodyToMono(EmailResponseDto.class)
+                .bodyToMono(String.class)
                 .block();
         return response;
     }

@@ -18,12 +18,12 @@ public class EmailController {
     private EmailService emailService;
 
     @PostMapping("simpleMessage")
-    public ResponseEntity<Response> sendSimpleMessage(@RequestBody EmailDetails emailDetails){
+    public ResponseEntity<String> sendSimpleMessage(@RequestBody EmailDetails emailDetails){
         return ResponseEntity.ok(emailService.sendSimpleMessage(emailDetails));
     }
 
     @PostMapping("message")
-    public ResponseEntity<Response> sendMessageWithAttachment(@RequestBody EmailDetails emailDetails){
+    public ResponseEntity<String> sendMessageWithAttachment(@RequestBody EmailDetails emailDetails){
         return ResponseEntity.ok(emailService.sendMessageWithAttachment(emailDetails));
     }
 }
