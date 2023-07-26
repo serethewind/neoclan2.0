@@ -18,5 +18,4 @@ public interface UserService {
     Response nameEnquiry(String accountNumber);
 
 
-
 }

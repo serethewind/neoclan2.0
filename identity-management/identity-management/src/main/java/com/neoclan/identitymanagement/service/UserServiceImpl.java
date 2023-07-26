@@ -3,6 +3,7 @@ package com.neoclan.identitymanagement.service;
 import com.neoclan.identitymanagement.dto.Response;
 import com.neoclan.identitymanagement.dto.UserData;
 import com.neoclan.identitymanagement.dto.UserUpdateRequestDto;
+import com.neoclan.identitymanagement.dto.communication.EmailDetails;
 import com.neoclan.identitymanagement.entity.UserEntity;
 import com.neoclan.identitymanagement.repository.UserRepository;
 import com.neoclan.identitymanagement.utils.ResponseUtils;
@@ -109,10 +110,12 @@ public class UserServiceImpl implements UserService {
                 .responseCode(ResponseUtils.SUCCESS)
                 .responseMessage(ResponseUtils.SUCCESS_MESSAGE)
                 .userData(UserData.builder()
-                        .accountBalance(null)
+                        .accountBalance(user.getAccountBalance())
                         .accountName(user.getFirstName() + " " + user.getOtherName() + " " + user.getLastName())
-                        .accountNumber(accountNumber)
+                        .accountNumber(user.getAccountNumber())
                         .build())
                 .build();
     }
+
+
 }

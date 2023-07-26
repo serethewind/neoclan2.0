@@ -5,6 +5,8 @@ import com.neoclan.identitymanagement.dto.Response;
 import com.neoclan.identitymanagement.dto.UserData;
 import com.neoclan.identitymanagement.dto.UserLoginRequestDto;
 import com.neoclan.identitymanagement.dto.UserRegisterRequestDto;
+import com.neoclan.identitymanagement.dto.communication.EmailDetails;
+import com.neoclan.identitymanagement.dto.communication.EmailResponseDto;
 import com.neoclan.identitymanagement.entity.RoleEntity;
 import com.neoclan.identitymanagement.entity.TokenEntity;
 import com.neoclan.identitymanagement.entity.TokenType;
@@ -13,8 +15,10 @@ import com.neoclan.identitymanagement.repository.RoleRepository;
 import com.neoclan.identitymanagement.repository.TokenRepository;
 import com.neoclan.identitymanagement.repository.UserRepository;
 import com.neoclan.identitymanagement.utils.ResponseUtils;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +26,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
@@ -37,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private PasswordEncoder passwordEncoder;
     private TokenRepository tokenRepository;
     private JwtService jwtService;
+    private WebClient webClientBuilder;
 
     @Override
     public Response loginUser(UserLoginRequestDto userLoginRequestDto) {
@@ -81,6 +88,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public Response registerUser(UserRegisterRequestDto userRegisterRequestDto) {
         boolean isExist = userRepository.existsByEmail(userRegisterRequestDto.getEmail());
         if (isExist) {
@@ -100,6 +108,16 @@ public class AuthServiceImpl implements AuthService {
                     .build();
 
             userRepository.save(user);
+
+            String accountDetails = user.getFirstName() + user.getOtherName() + user.getLastName() + "\nAccount " + user.getAccountNumber();
+
+            EmailDetails emailDetails = EmailDetails.builder()
+                    .recipient(user.getEmail())
+                    .subject("ACCOUNT DETAILS")
+                    .message("Congratulations! Your account has been successfully created! Kindly find your details below: \n" + accountDetails)
+                    .build();
+
+            EmailResponseDto response = sendSimpleMail(emailDetails); //returns an object of string which says 'message successfully delivered'
 
             return Response.builder().responseCode(ResponseUtils.SUCCESS).responseMessage(ResponseUtils.USER_REGISTERED_SUCCESS).userData(UserData.builder()
                             .accountBalance(user.getAccountBalance())
@@ -121,5 +139,41 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.saveAll(tokenEntityList);
     }
 
+    private EmailResponseDto sendSimpleMail(EmailDetails emailDetails) {
+
+//        EmailResponseDto response = webClientBuilder.build().post()
+//                .uri("http://localhost:8083/api/v2/email/simpleMessage", emailDetails)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .retrieve()
+//                .bodyToMono(EmailResponseDto.class)
+//                .block();
+
+//        EmailResponseDto response = webClientBuilder.post()
+//                .uri("http://localhost:8083/api/v2/email/simpleMessage", emailDetails)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .retrieve()
+//                .bodyToMono(EmailResponseDto.class)
+//                .block();
+
+        EmailResponseDto response = webClientBuilder.post()
+                .uri("http://localhost:8083/api/v2/email/simpleMessage")
+                .body(BodyInserters.fromValue(emailDetails))
+                .retrieve()
+                .bodyToMono(EmailResponseDto.class)
+                .block();
+
+        return response;
+    }
+
+    private EmailResponseDto sendSimpleMailWithAttachment(EmailDetails emailDetails) {
+
+        EmailResponseDto response = webClientBuilder.post()
+                .uri("http://localhost:8083/api/v2/email/message", emailDetails)
+                .contentType(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(EmailResponseDto.class)
+                .block();
+        return response;
+    }
 
 }
