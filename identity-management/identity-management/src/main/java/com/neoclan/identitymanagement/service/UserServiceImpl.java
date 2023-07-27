@@ -3,7 +3,7 @@ package com.neoclan.identitymanagement.service;
 import com.neoclan.identitymanagement.dto.Response;
 import com.neoclan.identitymanagement.dto.UserData;
 import com.neoclan.identitymanagement.dto.UserUpdateRequestDto;
-import com.neoclan.identitymanagement.dto.communication.EmailDetails;
+import com.neoclan.identitymanagement.dto.communication.UserBalanceInfo;
 import com.neoclan.identitymanagement.entity.UserEntity;
 import com.neoclan.identitymanagement.repository.UserRepository;
 import com.neoclan.identitymanagement.utils.ResponseUtils;
@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,6 +67,40 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Response UpdateUserBalanceAfterCredit(UserBalanceInfo userBalanceInfo) {
+        UserEntity user = userRepository.findByAccountNumber(userBalanceInfo.getAccountNumber()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setAccountBalance(user.getAccountBalance().add(userBalanceInfo.getTransactionAmount()));
+        userRepository.save(user);
+
+        return Response.builder()
+                .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
+                .responseMessage(ResponseUtils.ACCOUNT_CREDITED)
+                .userData(UserData.builder()
+                        .accountName(user.getFirstName() + " " + user.getLastName())
+                        .accountBalance(user.getAccountBalance())
+                        .accountNumber(user.getAccountNumber())
+                        .build())
+                .build();
+    }
+
+    @Override
+    public Response UpdateUserBalanceAfterDebit(UserBalanceInfo userBalanceInfo) {
+        UserEntity user = userRepository.findByAccountNumber(userBalanceInfo.getAccountNumber()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setAccountBalance(user.getAccountBalance().subtract(userBalanceInfo.getTransactionAmount()));
+        userRepository.save(user);
+
+        return Response.builder()
+                .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
+                .responseMessage(ResponseUtils.ACCOUNT_DEBITED)
+                .userData(UserData.builder()
+                        .accountName(user.getFirstName() + " " + user.getLastName())
+                        .accountBalance(user.getAccountBalance())
+                        .accountNumber(user.getAccountNumber())
+                        .build())
+                .build();
+    }
+
+    @Override
     public Response balanceEnquiry(String accountNumber) {
         boolean isAccountExist = userRepository.existsByAccountNumber(accountNumber);
 
@@ -111,7 +144,7 @@ public class UserServiceImpl implements UserService {
                 .responseMessage(ResponseUtils.SUCCESS_MESSAGE)
                 .userData(UserData.builder()
                         .accountBalance(user.getAccountBalance())
-                        .accountName(user.getFirstName() + " " + user.getOtherName() + " " + user.getLastName())
+                        .accountName(user.getFirstName() + " " + user.getLastName())
                         .accountNumber(user.getAccountNumber())
                         .build())
                 .build();

@@ -36,28 +36,6 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.csrf(AbstractHttpConfigurer::disable)
-//                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authEntryPoint))
-//                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//
-//                .authorizeHttpRequests((authorize) -> {
-//                        authorize
-//                                .requestMatchers("api/v2/auth/**").permitAll()
-//                                .anyRequest().authenticated();
-//                }).httpBasic(Customizer.withDefaults());
-//
-//        http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
-//        http.logout(logout -> logout
-//                .logoutUrl("")
-//                .addLogoutHandler(logoutService)
-//                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-//        );
-//
-//        return http.build();
-//    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
@@ -68,7 +46,9 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests((authorize) -> {
-                    authorize.requestMatchers(HttpMethod.POST, "/api/v2/auth/**").permitAll()
+                    authorize
+                            .requestMatchers(HttpMethod.POST, "/api/v2/auth/**").permitAll()
+                            .requestMatchers( "/api/v2/user/**").permitAll()
                             .anyRequest().authenticated();
                 }).httpBasic(Customizer.withDefaults());
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
