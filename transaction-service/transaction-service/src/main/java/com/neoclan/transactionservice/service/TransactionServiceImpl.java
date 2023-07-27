@@ -1,6 +1,7 @@
 package com.neoclan.transactionservice.service;
 
 import com.neoclan.transactionservice.dto.*;
+import com.neoclan.transactionservice.dto.communication.UserBalanceInfo;
 import com.neoclan.transactionservice.dto.communication.UserInfo;
 import com.neoclan.transactionservice.entity.TransactionEntity;
 import com.neoclan.transactionservice.entity.TransactionType;
@@ -190,6 +191,14 @@ public class TransactionServiceImpl implements TransactionService {
                 .accountBalance(response.getUserData().getAccountBalance())
                 .accountNumber(response.getUserData().getAccountNumber())
                 .build();
+    }
+
+    private void creditAndUpdateUserBalance(UserBalanceInfo userBalanceInfo){
+
+    }
+
+    private void debitAndUpdateUserBalance(UserBalanceInfo userBalanceInfo){
+
     }
 
 

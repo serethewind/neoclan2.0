@@ -2,6 +2,7 @@ package com.neoclan.identitymanagement.controller;
 
 import com.neoclan.identitymanagement.dto.Response;
 import com.neoclan.identitymanagement.dto.UserUpdateRequestDto;
+import com.neoclan.identitymanagement.dto.communication.UserBalanceInfo;
 import com.neoclan.identitymanagement.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,16 @@ public class IdentityController {
     @GetMapping("retrieve-accountName")
     public ResponseEntity<Response> nameEnquiry(@RequestParam("accountNumber") String accountNumber){
         return ResponseEntity.ok(userService.nameEnquiry(accountNumber));
+    }
+
+    @PostMapping("credit-and-update-accountBalance")
+    public ResponseEntity<Response> creditAndUpdateUserBalance(@RequestBody UserBalanceInfo userBalanceInfo){
+        return ResponseEntity.ok(userService.creditAndUpdateUserBalance(userBalanceInfo));
+    }
+
+    @PostMapping("debit-and-update-accountBalance")
+    public ResponseEntity<Response> debitAndUpdateUserBalance(@RequestBody UserBalanceInfo userBalanceInfo){
+        return ResponseEntity.ok(userService.debitAndUpdateUserBalance(userBalanceInfo));
     }
 }
 
