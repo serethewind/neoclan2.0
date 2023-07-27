@@ -9,6 +9,7 @@ import com.neoclan.transactionservice.repository.TransactionRepository;
 import com.neoclan.transactionservice.utils.ResponseUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class TransactionServiceImpl implements TransactionService {
 //    private WebClient.Builder webClientBuilder;
 
     private WebClient webClient;
+
     @Override
     public Response debitRequest(TransactionRequest transactionRequest) {
         //make a call to the IdentityManagementService via the fetchUserByAccountNumber controller to get the user performing the transaction
@@ -55,9 +57,15 @@ public class TransactionServiceImpl implements TransactionService {
                 .amount(transactionRequest.getAmount())
                 .build();
 
+        UserBalanceInfo userBalanceInfo = UserBalanceInfo.builder()
+                .accountNumber(user.getAccountNumber())
+                .transactionAmount(transactionRequest.getAmount())
+                .build();
+
         saveTransaction(transactionDto);
 
         //publish event that will be handled by the identity management service to update the user with the new user balance
+        debitAndUpdateUserBalance(userBalanceInfo);
 
         return Response.builder()
                 .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
@@ -91,9 +99,15 @@ public class TransactionServiceImpl implements TransactionService {
                 .amount(transactionRequest.getAmount())
                 .build();
 
+        UserBalanceInfo userBalanceInfo = UserBalanceInfo.builder()
+                .accountNumber(user.getAccountNumber())
+                .transactionAmount(transactionRequest.getAmount())
+                .build();
+
         saveTransaction(transactionDto);
 
         //publish event that will be handled by the identity management service to update the user with the new user balance
+        creditAndUpdateUserBalance(userBalanceInfo);
 
         return Response.builder()
                 .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
@@ -193,13 +207,22 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
-    private void creditAndUpdateUserBalance(UserBalanceInfo userBalanceInfo){
-
+    private void creditAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
+        webClient.post()
+                .uri("http://localhost:8081/api/v2/user/credit-and-update-accountBalance")
+                .body(BodyInserters.fromValue(userBalanceInfo))
+                .retrieve()
+                .bodyToMono(Response.class)
+                .block();
     }
 
-    private void debitAndUpdateUserBalance(UserBalanceInfo userBalanceInfo){
-
+    private void debitAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
+        webClient.post()
+                .uri("http://localhost:8081/api/v2/user/debit-and-update-accountBalance")
+                .body(BodyInserters.fromValue(userBalanceInfo))
+                .retrieve()
+                .bodyToMono(Response.class)
+                .block();
     }
-
 
 }

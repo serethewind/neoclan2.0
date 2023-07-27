@@ -44,12 +44,12 @@ public class IdentityController {
 
     @PostMapping("credit-and-update-accountBalance")
     public ResponseEntity<Response> creditAndUpdateUserBalance(@RequestBody UserBalanceInfo userBalanceInfo){
-        return ResponseEntity.ok(userService.creditAndUpdateUserBalance(userBalanceInfo));
+        return ResponseEntity.ok(userService.UpdateUserBalanceAfterCredit(userBalanceInfo));
     }
 
     @PostMapping("debit-and-update-accountBalance")
     public ResponseEntity<Response> debitAndUpdateUserBalance(@RequestBody UserBalanceInfo userBalanceInfo){
-        return ResponseEntity.ok(userService.debitAndUpdateUserBalance(userBalanceInfo));
+        return ResponseEntity.ok(userService.UpdateUserBalanceAfterDebit(userBalanceInfo));
     }
 }
 

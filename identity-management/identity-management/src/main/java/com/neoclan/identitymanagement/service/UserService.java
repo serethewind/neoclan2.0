@@ -14,8 +14,8 @@ public interface UserService {
 
     Response updateUserById(Long id, UserUpdateRequestDto userRequest);
 
-    Response creditAndUpdateUserBalance(UserBalanceInfo userBalanceInfo);
-    Response debitAndUpdateUserBalance(UserBalanceInfo userBalanceInfo);
+    Response UpdateUserBalanceAfterCredit(UserBalanceInfo userBalanceInfo);
+    Response UpdateUserBalanceAfterDebit(UserBalanceInfo userBalanceInfo);
 
     Response balanceEnquiry(String accountNumber);
 

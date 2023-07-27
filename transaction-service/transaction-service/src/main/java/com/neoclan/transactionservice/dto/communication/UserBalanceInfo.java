@@ -13,5 +13,5 @@ import java.math.BigDecimal;
 @Builder
 public class UserBalanceInfo {
     private String accountNumber;
-    private BigDecimal accountBalance;
+    private BigDecimal transactionAmount;
 }

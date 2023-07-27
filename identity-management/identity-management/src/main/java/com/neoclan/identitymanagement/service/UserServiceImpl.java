@@ -3,7 +3,6 @@ package com.neoclan.identitymanagement.service;
 import com.neoclan.identitymanagement.dto.Response;
 import com.neoclan.identitymanagement.dto.UserData;
 import com.neoclan.identitymanagement.dto.UserUpdateRequestDto;
-import com.neoclan.identitymanagement.dto.communication.EmailDetails;
 import com.neoclan.identitymanagement.dto.communication.UserBalanceInfo;
 import com.neoclan.identitymanagement.entity.UserEntity;
 import com.neoclan.identitymanagement.repository.UserRepository;
@@ -12,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,9 +67,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Response creditAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
+    public Response UpdateUserBalanceAfterCredit(UserBalanceInfo userBalanceInfo) {
         UserEntity user = userRepository.findByAccountNumber(userBalanceInfo.getAccountNumber()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        user.setAccountBalance(user.getAccountBalance().add(userBalanceInfo.getAccountBalance()));
+        user.setAccountBalance(user.getAccountBalance().add(userBalanceInfo.getTransactionAmount()));
+        userRepository.save(user);
 
         return Response.builder()
                 .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
@@ -85,9 +84,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Response debitAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
+    public Response UpdateUserBalanceAfterDebit(UserBalanceInfo userBalanceInfo) {
         UserEntity user = userRepository.findByAccountNumber(userBalanceInfo.getAccountNumber()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        user.setAccountBalance(user.getAccountBalance().subtract(userBalanceInfo.getAccountBalance()));
+        user.setAccountBalance(user.getAccountBalance().subtract(userBalanceInfo.getTransactionAmount()));
+        userRepository.save(user);
 
         return Response.builder()
                 .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
