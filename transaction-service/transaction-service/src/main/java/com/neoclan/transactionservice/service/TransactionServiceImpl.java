@@ -178,7 +178,7 @@ public class TransactionServiceImpl implements TransactionService {
 //                .bodyToMono(Response.class)
 //                .block();
 
-        Response response = webClient.put()
+        Response response = webClient.get()
                 .uri("http://localhost:8081/api/v2/user/retrieve-accountName",
                         uriBuilder -> uriBuilder.queryParam("accountNumber", accountNumber).build())
                 .retrieve()
