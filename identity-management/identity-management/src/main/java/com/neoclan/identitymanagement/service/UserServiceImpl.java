@@ -4,6 +4,7 @@ import com.neoclan.identitymanagement.dto.Response;
 import com.neoclan.identitymanagement.dto.UserData;
 import com.neoclan.identitymanagement.dto.UserUpdateRequestDto;
 import com.neoclan.identitymanagement.dto.communication.EmailDetails;
+import com.neoclan.identitymanagement.dto.communication.UserBalanceInfo;
 import com.neoclan.identitymanagement.entity.UserEntity;
 import com.neoclan.identitymanagement.repository.UserRepository;
 import com.neoclan.identitymanagement.utils.ResponseUtils;
@@ -65,6 +66,38 @@ public class UserServiceImpl implements UserService {
                         .build())
                 .build();
 
+    }
+
+    @Override
+    public Response creditAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
+        UserEntity user = userRepository.findByAccountNumber(userBalanceInfo.getAccountNumber()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setAccountBalance(user.getAccountBalance().add(userBalanceInfo.getAccountBalance()));
+
+        return Response.builder()
+                .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
+                .responseMessage(ResponseUtils.ACCOUNT_CREDITED)
+                .userData(UserData.builder()
+                        .accountName(user.getFirstName() + " " + user.getLastName())
+                        .accountBalance(user.getAccountBalance())
+                        .accountNumber(user.getAccountNumber())
+                        .build())
+                .build();
+    }
+
+    @Override
+    public Response debitAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
+        UserEntity user = userRepository.findByAccountNumber(userBalanceInfo.getAccountNumber()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setAccountBalance(user.getAccountBalance().subtract(userBalanceInfo.getAccountBalance()));
+
+        return Response.builder()
+                .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
+                .responseMessage(ResponseUtils.ACCOUNT_DEBITED)
+                .userData(UserData.builder()
+                        .accountName(user.getFirstName() + " " + user.getLastName())
+                        .accountBalance(user.getAccountBalance())
+                        .accountNumber(user.getAccountNumber())
+                        .build())
+                .build();
     }
 
     @Override
