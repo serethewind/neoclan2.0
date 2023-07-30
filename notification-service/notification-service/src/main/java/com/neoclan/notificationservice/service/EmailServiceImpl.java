@@ -17,6 +17,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 
@@ -37,12 +38,9 @@ public class EmailServiceImpl implements EmailService {
         this.modelMapper = modelMapper;
     }
 
-    public void consumeMessageFromRabbitMq(EmailDetails emailDetails){
-
-    }
 
     @Override
-    @RabbitListener(queues = "${rabbitmq.queue.json.name}")
+    @Transactional
     public String sendSimpleMessage(EmailDetails emailDetails) {
 
         try {
@@ -52,14 +50,16 @@ public class EmailServiceImpl implements EmailService {
             mailMessage.setSubject(emailDetails.getSubject());
             mailMessage.setText(emailDetails.getMessage());
 
-           EmailEntity email = EmailEntity.builder()
-                   .message(mailMessage.getText())
-                   .subject(mailMessage.getSubject())
-                   .attachment(null)
-                   .build();
-           emailRepository.save(email);
-
             javaMailSender.send(mailMessage);
+
+            EmailEntity email = EmailEntity.builder()
+                    .message(mailMessage.getText())
+                    .subject(mailMessage.getSubject())
+                    .attachment(null)
+                    .build();
+
+            emailRepository.save(email);
+
             log.info("Message sent successfully");
             return "Mail sent successfully";
         } catch (MailException e) {
@@ -68,6 +68,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Transactional
     public String sendMessageWithAttachment(EmailDetails emailDetails) {
         try {
             //first tap into javaMailSender.createMimeMessage() to create Mime Message

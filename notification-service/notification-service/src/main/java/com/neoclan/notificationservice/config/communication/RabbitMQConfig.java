@@ -11,62 +11,68 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    @Value("${rabbitmq.queue.name}")
-    private String queue;
 
-    @Value("${rabbitmq.queue.json.name}")
-    private String jsonQueue;
+    @Value("${rabbitmq.registration.email.queue.name}")
+    private String emailRegistrationQueue;
 
-    @Value("${rabbitmq.exchange.name}")
-    private String exchange;
+    @Value("${rabbitmq.login.email.queue.name}")
+    private String loginEmailQueue;
 
-    @Value("${rabbitmq.routing.key}")
-
-    private String routingKey;
-
-    @Value("${rabbitmq.json.routing.key}")
-    private String routingJsonKey;
-
+//    @Value("${rabbitmq.exchange.name}")
+//    private String exchange;
+//    @Value("${rabbitmq.routing.key}")
+//    private String routingKey;
+//
+//    @Value("${rabbitmq.json.routing.key}")
+//    private String routingJsonKey;
 
     @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange(exchange);
-    }
-    @Bean
-    public Queue queue() {
-        return new Queue(queue);
+    public Queue emailRegistrationQueue() {
+        return new Queue(emailRegistrationQueue);
     }
 
     @Bean
-    public Queue jsonQueue(){
-        return new Queue(jsonQueue);
-    }
-
-    //binding between queue and exchange using route key
-    @Bean
-    public Binding binding() {
-        return BindingBuilder.bind(queue())
-                .to(exchange())
-                .with(routingKey);
+    public Queue emailLoginQueue(){
+        return new Queue(loginEmailQueue);
     }
 
     @Bean
-    public Binding jsonBinding(){
-        return BindingBuilder.bind(jsonQueue())
-                .to(exchange())
-                .with(routingJsonKey);
-    }
-
-    //rabbit template for sending json messages
-    @Bean
-    public MessageConverter converter(){
+    public MessageConverter converter() {
         return new Jackson2JsonMessageConverter();
     }
-    //amqpTemplate is an interface that is implemented by rabbit template. it supports json message
+
     @Bean
-    public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory){
+// amqpTemplate is an interface that is implemented by rabbit template. it supports json message
+    public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(converter());
         return rabbitTemplate;
     }
+//
+//    @Bean
+//    public Queue queue() {
+//        return new Queue(queue);
+//    }
+//
+//
+//    @Bean
+//    public TopicExchange exchange() {
+//        return new TopicExchange(exchange);
+//    }
+//
+//
+//    @Bean
+//    public Binding binding() {
+//        return BindingBuilder.bind(queue())
+//                .to(exchange())
+//                .with(routingKey);
+//    }
+//
+//    @Bean
+//    public Binding jsonBinding(){
+//        return BindingBuilder.bind(jsonQueue())
+//                .to(exchange())
+//                .with(routingJsonKey);
+//    }
+
 }
