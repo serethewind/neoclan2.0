@@ -146,7 +146,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .responseMessage(ResponseUtils.ACCOUNT_DEBITED_FOR_TRANSFER)
                 .userData(UserData.builder()
                         .accountName(sendingUser.getAccountName())
-                        .accountBalance(sendingUser.getAccountBalance())
+                        .accountBalance(debitResponse.getUserData().getAccountBalance())
                         .accountNumber(sendingUser.getAccountNumber())
                         .build())
                 .build();
