@@ -25,4 +25,15 @@ public class RabbitMQConsumer {
         emailService.sendSimpleMessage(emailDetails);
         log.info(String.format("Message sent -> %s", emailDetails));
     }
+
+    @RabbitListener(queues = "${rabbitmq.credit.email.queue.name}")
+    public void sendCreditEmailNotification(EmailDetails emailDetails){
+        emailService.sendSimpleMessage(emailDetails);
+        log.info(String.format("Message sent -> %s", emailDetails));
+    }
+    @RabbitListener(queues = "${rabbitmq.debit.email.queue.name}")
+    public void sendDebitEmailNotification(EmailDetails emailDetails){
+        emailService.sendSimpleMessage(emailDetails);
+        log.info(String.format("Message sent -> %s", emailDetails));
+    }
 }

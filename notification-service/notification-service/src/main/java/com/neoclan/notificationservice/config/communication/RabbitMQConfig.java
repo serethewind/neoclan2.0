@@ -17,6 +17,10 @@ public class RabbitMQConfig {
 
     @Value("${rabbitmq.login.email.queue.name}")
     private String loginEmailQueue;
+    @Value("${rabbitmq.credit.email.queue.name}")
+    private String creditEmailQueue;
+    @Value("${rabbitmq.debit.email.queue.name}")
+    private String debitEmailQueue;
 
 //    @Value("${rabbitmq.exchange.name}")
 //    private String exchange;
@@ -34,6 +38,14 @@ public class RabbitMQConfig {
     @Bean
     public Queue emailLoginQueue(){
         return new Queue(loginEmailQueue);
+    }
+    @Bean
+    public Queue emailCreditQueue(){
+        return new Queue(creditEmailQueue);
+    }
+    @Bean
+    public Queue emailDebitQueue(){
+        return new Queue(debitEmailQueue);
     }
 
     @Bean

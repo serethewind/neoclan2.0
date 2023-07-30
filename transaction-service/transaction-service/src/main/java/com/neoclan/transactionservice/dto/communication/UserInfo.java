@@ -15,5 +15,4 @@ public class UserInfo {
     private String accountName;
     private String accountNumber;
     private BigDecimal accountBalance;
-    private String email;
 }

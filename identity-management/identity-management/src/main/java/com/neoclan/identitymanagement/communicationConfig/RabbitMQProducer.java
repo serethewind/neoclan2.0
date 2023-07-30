@@ -22,6 +22,22 @@ public class RabbitMQProducer {
     @Value("${rabbitmq.registration.email.routing.key}")
     private String emailRegistrationRoutingKey;
 
+    @Value("${rabbitmq.credit.email.routing.key}")
+    private String creditEmailRoutingKey;
+
+    @Value("${rabbitmq.debit.email.routing.key}")
+    private String debitEmailRoutingKey;
+
+    public void sendCreditEmailNotification(EmailDetails emailDetails) {
+        rabbitTemplate.convertAndSend(notificationExchange, creditEmailRoutingKey, emailDetails);
+        log.info(String.format("Message sent -> %s", emailDetails));
+    }
+
+    public void sendDebitEmailNotification(EmailDetails emailDetails) {
+        rabbitTemplate.convertAndSend(notificationExchange, debitEmailRoutingKey, emailDetails);
+        log.info(String.format("Message sent -> %s", emailDetails));
+    }
+
     public void sendRegistrationEmailNotification(EmailDetails emailDetails) {
         rabbitTemplate.convertAndSend(notificationExchange, emailRegistrationRoutingKey, emailDetails);
         log.info(String.format("Message sent -> %s", emailDetails));
