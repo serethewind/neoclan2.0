@@ -7,7 +7,9 @@ import com.neoclan.notificationservice.repository.EmailRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.MailException;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 
 @Service
+@Slf4j
 public class EmailServiceImpl implements EmailService {
     private EmailRepository emailRepository;
     private JavaMailSender javaMailSender;
@@ -27,13 +30,19 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String mailSender;
 
+
     public EmailServiceImpl(EmailRepository emailRepository, JavaMailSender javaMailSender, ModelMapper modelMapper) {
         this.emailRepository = emailRepository;
         this.javaMailSender = javaMailSender;
         this.modelMapper = modelMapper;
     }
 
+    public void consumeMessageFromRabbitMq(EmailDetails emailDetails){
+
+    }
+
     @Override
+    @RabbitListener(queues = "${rabbitmq.queue.json.name}")
     public String sendSimpleMessage(EmailDetails emailDetails) {
 
         try {
@@ -51,6 +60,7 @@ public class EmailServiceImpl implements EmailService {
            emailRepository.save(email);
 
             javaMailSender.send(mailMessage);
+            log.info("Message sent successfully");
             return "Mail sent successfully";
         } catch (MailException e) {
             throw new RuntimeException(e);

@@ -17,6 +17,10 @@ import com.neoclan.identitymanagement.repository.UserRepository;
 import com.neoclan.identitymanagement.utils.ResponseUtils;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,7 +39,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private UserRepository userRepository;
@@ -45,6 +49,65 @@ public class AuthServiceImpl implements AuthService {
     private TokenRepository tokenRepository;
     private JwtService jwtService;
     private WebClient webClientBuilder;
+    private RabbitTemplate rabbitTemplate;
+
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenRepository tokenRepository, JwtService jwtService, WebClient webClientBuilder, RabbitTemplate rabbitTemplate) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenRepository = tokenRepository;
+        this.jwtService = jwtService;
+        this.webClientBuilder = webClientBuilder;
+        this.rabbitTemplate = rabbitTemplate;
+    }
+
+    @Value("${rabbitmq.exchange.name}")
+    private String exchange;
+    @Value("${rabbitmq.json.routing.key}")
+    private String jsonRoutingKey;
+
+
+    @Override
+    public Response registerUser(UserRegisterRequestDto userRegisterRequestDto) {
+        boolean isExist = userRepository.existsByEmail(userRegisterRequestDto.getEmail());
+        if (isExist) {
+            return Response.builder().responseCode(ResponseUtils.USER_EXISTS_CODE).responseMessage(ResponseUtils.USER_EXISTS_MESSAGE).userData(null).build();
+        } else {
+            RoleEntity role = roleRepository.findByName("USER").orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+            UserEntity user = UserEntity.builder()
+                    .firstName(userRegisterRequestDto.getFirstName())
+                    .lastName(userRegisterRequestDto.getLastName())
+                    .email(userRegisterRequestDto.getEmail())
+                    .username(userRegisterRequestDto.getUsername())
+                    .password(passwordEncoder.encode(userRegisterRequestDto.getPassword()))
+                    .accountBalance(BigDecimal.ZERO)
+                    .accountNumber(ResponseUtils.generateAccountNumber(ResponseUtils.lengthOfAccountNumber))
+                    .roles(Collections.singleton(role))
+                    .status("ACTIVE")
+                    .build();
+
+            userRepository.save(user);
+
+            String accountDetails = user.getFirstName() + user.getOtherName() + user.getLastName() + "\nAccount " + user.getAccountNumber();
+
+            EmailDetails emailDetails = EmailDetails.builder()
+                    .recipient(user.getEmail())
+                    .subject("ACCOUNT DETAILS")
+                    .message("Congratulations! Your account has been successfully created! Kindly find your details below: \n" + accountDetails)
+                    .build();
+
+            sendJsonMessageWithRabbitMq(emailDetails);
+
+            return Response.builder().responseCode(ResponseUtils.SUCCESS).responseMessage(ResponseUtils.USER_REGISTERED_SUCCESS).userData(UserData.builder()
+                            .accountBalance(user.getAccountBalance())
+                            .accountNumber(user.getAccountNumber())
+                            .accountName(user.getFirstName() + " " + user.getLastName() + " " + user.getOtherName())
+                            .build())
+                    .build();
+        }
+    }
 
     @Override
     public Response loginUser(UserLoginRequestDto userLoginRequestDto) {
@@ -88,48 +151,6 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    @Override
-    public Response registerUser(UserRegisterRequestDto userRegisterRequestDto) {
-        boolean isExist = userRepository.existsByEmail(userRegisterRequestDto.getEmail());
-        if (isExist) {
-            return Response.builder().responseCode(ResponseUtils.USER_EXISTS_CODE).responseMessage(ResponseUtils.USER_EXISTS_MESSAGE).userData(null).build();
-        } else {
-            RoleEntity role = roleRepository.findByName("USER").orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-            UserEntity user = UserEntity.builder()
-                    .firstName(userRegisterRequestDto.getFirstName())
-                    .lastName(userRegisterRequestDto.getLastName())
-                    .email(userRegisterRequestDto.getEmail())
-                    .username(userRegisterRequestDto.getUsername())
-                    .password(passwordEncoder.encode(userRegisterRequestDto.getPassword()))
-                    .accountBalance(BigDecimal.ZERO)
-                    .accountNumber(ResponseUtils.generateAccountNumber(ResponseUtils.lengthOfAccountNumber))
-                    .roles(Collections.singleton(role))
-                    .status("ACTIVE")
-                    .build();
-
-            userRepository.save(user);
-
-            String accountDetails = user.getFirstName() + user.getOtherName() + user.getLastName() + "\nAccount " + user.getAccountNumber();
-
-            EmailDetails emailDetails = EmailDetails.builder()
-                    .recipient(user.getEmail())
-                    .subject("ACCOUNT DETAILS")
-                    .message("Congratulations! Your account has been successfully created! Kindly find your details below: \n" + accountDetails)
-                    .build();
-
-//            String response = sendSimpleMail(emailDetails);
-            //returns an object of string which says 'message successfully delivered'
-
-            return Response.builder().responseCode(ResponseUtils.SUCCESS).responseMessage(ResponseUtils.USER_REGISTERED_SUCCESS).userData(UserData.builder()
-                            .accountBalance(user.getAccountBalance())
-                            .accountNumber(user.getAccountNumber())
-                            .accountName(user.getFirstName() + " " + user.getLastName() + " " + user.getOtherName())
-                            .build())
-                    .build();
-        }
-    }
-
     private void revokeValidTokens(UserEntity users) {
         List<TokenEntity> tokenEntityList = tokenRepository.findAllValidTokensByUser(users.getId());
         if (tokenEntityList.isEmpty())
@@ -141,25 +162,22 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.saveAll(tokenEntityList);
     }
 
-    private String sendSimpleMail(EmailDetails emailDetails) {
-
-//        EmailResponseDto response = webClientBuilder.build().post()
-//                 .uri("http://localhost:8083/api/v2/email/simpleMessage")
+//    private String sendSimpleMail(EmailDetails emailDetails) {
+////        EmailResponseDto response = webClientBuilder.build().post()
+////                 .uri("http://localhost:8083/api/v2/email/simpleMessage")
+////                .body(BodyInserters.fromValue(emailDetails))
+////                .retrieve()
+////                .bodyToMono(EmailResponseDto.class)
+////                .block()
+//        String response = webClientBuilder.post()
+//                .uri("http://localhost:8083/api/v2/email/simpleMessage")
 //                .body(BodyInserters.fromValue(emailDetails))
 //                .retrieve()
-//                .bodyToMono(EmailResponseDto.class)
+//                .bodyToMono(String.class)
 //                .block();
-
-
-        String response = webClientBuilder.post()
-                .uri("http://localhost:8083/api/v2/email/simpleMessage")
-                .body(BodyInserters.fromValue(emailDetails))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        return response;
-    }
+//
+//        return response;
+//    }
 
     private String sendSimpleMailWithAttachment(EmailDetails emailDetails) {
 
@@ -170,6 +188,16 @@ public class AuthServiceImpl implements AuthService {
                 .bodyToMono(String.class)
                 .block();
         return response;
+    }
+
+    private void sendSimpleMessageWithRabbitMq(EmailDetails emailDetails){
+        rabbitTemplate.convertAndSend(exchange, jsonRoutingKey, emailDetails);
+        log.info(String.format("Message sent -> %s", emailDetails));
+    }
+
+    private void sendJsonMessageWithRabbitMq(EmailDetails emailDetails){
+        log.info("Json message sent successfully");
+        rabbitTemplate.convertAndSend(exchange, jsonRoutingKey, emailDetails);
     }
 
 }
