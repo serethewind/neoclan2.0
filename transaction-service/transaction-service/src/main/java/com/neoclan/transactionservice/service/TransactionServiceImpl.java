@@ -1,6 +1,7 @@
 package com.neoclan.transactionservice.service;
 
 import com.neoclan.transactionservice.dto.*;
+import com.neoclan.transactionservice.dto.communication.EmailDetails;
 import com.neoclan.transactionservice.dto.communication.UserBalanceInfo;
 import com.neoclan.transactionservice.dto.communication.UserInfo;
 import com.neoclan.transactionservice.entity.TransactionEntity;
