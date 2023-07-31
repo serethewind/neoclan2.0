@@ -19,9 +19,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
     private TransactionRepository transactionRepository;
-//    private WebClient.Builder webClientBuilder;
-
-    private WebClient webClient;
+    private WebClient.Builder webClientBuilder;
+//    private WebClient webClient;
 
     @Override
     public Response debitRequest(TransactionRequest transactionRequest) {
@@ -152,6 +151,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
+
+
     @Override
     public List<TransactionResponseDto> fetchTransactionByUser(String accountNumber) {
         return transactionRepository.findByAccountNumber(accountNumber).stream()
@@ -186,19 +187,19 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private UserInfo retrieveUser(String accountNumber) {
-//        Response response = webClientBuilder.build().get()
-//                .uri("http://localhost:8082/api/v2/user/retrieve-accountName",
-//                        uriBuilder -> uriBuilder.queryParam("accountNumber", accountNumber).build())
-//                .retrieve()
-//                .bodyToMono(Response.class)
-//                .block();
-
-        Response response = webClient.get()
-                .uri("http://localhost:8081/api/v2/user/retrieve-accountName",
+//        WebClient.Builder() is preferable for load balancing where the service in communication with has multiple instances
+        Response response = webClientBuilder.build().get()
+                .uri("http://identity-management/api/v2/user/retrieve-accountName",
                         uriBuilder -> uriBuilder.queryParam("accountNumber", accountNumber).build())
                 .retrieve()
                 .bodyToMono(Response.class)
                 .block();
+//        Response response = webClient.get()
+//                .uri("http://localhost:8081/api/v2/user/retrieve-accountName",
+//                        uriBuilder -> uriBuilder.queryParam("accountNumber", accountNumber).build())
+//                .retrieve()
+//                .bodyToMono(Response.class)
+//                .block();
 
         return UserInfo.builder()
                 .accountName(response.getUserData().getAccountName())
@@ -208,8 +209,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void creditAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
-        webClient.post()
-                .uri("http://localhost:8081/api/v2/user/credit-and-update-accountBalance")
+        webClientBuilder.build()
+                .post()
+                .uri("http://identity-management/api/v2/user/credit-and-update-accountBalance")
                 .body(BodyInserters.fromValue(userBalanceInfo))
                 .retrieve()
                 .bodyToMono(Response.class)
@@ -217,8 +219,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void debitAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
-        webClient.post()
-                .uri("http://localhost:8081/api/v2/user/debit-and-update-accountBalance")
+        webClientBuilder.build()
+                .post()
+                .uri("http://identity-management/api/v2/user/debit-and-update-accountBalance")
                 .body(BodyInserters.fromValue(userBalanceInfo))
                 .retrieve()
                 .bodyToMono(Response.class)
