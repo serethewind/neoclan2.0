@@ -1,8 +1,10 @@
 package com.neoclan.identitymanagement.service;
 
+import com.neoclan.identitymanagement.communicationConfig.RabbitMQProducer;
 import com.neoclan.identitymanagement.dto.Response;
 import com.neoclan.identitymanagement.dto.UserData;
 import com.neoclan.identitymanagement.dto.UserUpdateRequestDto;
+import com.neoclan.identitymanagement.dto.communication.EmailDetails;
 import com.neoclan.identitymanagement.dto.communication.UserBalanceInfo;
 import com.neoclan.identitymanagement.entity.UserEntity;
 import com.neoclan.identitymanagement.repository.UserRepository;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private ModelMapper modelMapper;
+
+    private RabbitMQProducer rabbitMQProducer;
 
     @Override
     public List<Response> fetchAll() {
@@ -72,6 +76,13 @@ public class UserServiceImpl implements UserService {
         user.setAccountBalance(user.getAccountBalance().add(userBalanceInfo.getTransactionAmount()));
         userRepository.save(user);
 
+        EmailDetails emailDetails = new EmailDetails();
+        emailDetails.setRecipient(user.getEmail());
+        emailDetails.setSubject("NeoClan Tech Transaction Alert [Credit : " + userBalanceInfo.getTransactionAmount() + "]");
+        emailDetails.setMessage("Credit transaction of " + userBalanceInfo.getTransactionAmount() + " has been performed on your account. Your new account balance is " + user.getAccountBalance());
+
+        rabbitMQProducer.sendCreditEmailNotification(emailDetails); //email notification published via rabbit mq
+
         return Response.builder()
                 .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)
                 .responseMessage(ResponseUtils.ACCOUNT_CREDITED)
@@ -88,6 +99,13 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findByAccountNumber(userBalanceInfo.getAccountNumber()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         user.setAccountBalance(user.getAccountBalance().subtract(userBalanceInfo.getTransactionAmount()));
         userRepository.save(user);
+
+        EmailDetails emailDetails = new EmailDetails();
+        emailDetails.setRecipient(user.getEmail());
+        emailDetails.setSubject("NeoClan Tech Transaction Alert [Debit : " + userBalanceInfo.getTransactionAmount() + "]");
+        emailDetails.setMessage("Debit transaction of " + userBalanceInfo.getTransactionAmount() + " has been performed on your account. Your new account balance is " + user.getAccountBalance());
+
+        rabbitMQProducer.sendDebitEmailNotification(emailDetails);//rabbit mq publishes notification to the consumer
 
         return Response.builder()
                 .responseCode(ResponseUtils.SUCCESSFUL_TRANSACTION)

@@ -7,7 +7,9 @@ import com.neoclan.notificationservice.repository.EmailRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.MailException;
@@ -15,10 +17,12 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 
 @Service
+@Slf4j
 public class EmailServiceImpl implements EmailService {
     private EmailRepository emailRepository;
     private JavaMailSender javaMailSender;
@@ -27,13 +31,16 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String mailSender;
 
+
     public EmailServiceImpl(EmailRepository emailRepository, JavaMailSender javaMailSender, ModelMapper modelMapper) {
         this.emailRepository = emailRepository;
         this.javaMailSender = javaMailSender;
         this.modelMapper = modelMapper;
     }
 
+
     @Override
+    @Transactional
     public String sendSimpleMessage(EmailDetails emailDetails) {
 
         try {
@@ -43,14 +50,17 @@ public class EmailServiceImpl implements EmailService {
             mailMessage.setSubject(emailDetails.getSubject());
             mailMessage.setText(emailDetails.getMessage());
 
-           EmailEntity email = EmailEntity.builder()
-                   .message(mailMessage.getText())
-                   .subject(mailMessage.getSubject())
-                   .attachment(null)
-                   .build();
-           emailRepository.save(email);
-
             javaMailSender.send(mailMessage);
+
+            EmailEntity email = EmailEntity.builder()
+                    .message(mailMessage.getText())
+                    .subject(mailMessage.getSubject())
+                    .attachment(null)
+                    .build();
+
+            emailRepository.save(email);
+
+            log.info("Message sent successfully");
             return "Mail sent successfully";
         } catch (MailException e) {
             throw new RuntimeException(e);
@@ -58,6 +68,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Transactional
     public String sendMessageWithAttachment(EmailDetails emailDetails) {
         try {
             //first tap into javaMailSender.createMimeMessage() to create Mime Message

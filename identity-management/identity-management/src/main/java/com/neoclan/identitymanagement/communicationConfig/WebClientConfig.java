@@ -1,4 +1,4 @@
-package com.neoclan.identitymanagement.communication;
+package com.neoclan.identitymanagement.communicationConfig;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,4 +10,5 @@ public class WebClientConfig {
     public WebClient webClient(){
         return WebClient.builder().build();
     }
+
 }

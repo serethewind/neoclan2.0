@@ -14,6 +14,8 @@ public class ResponseUtils {
 
     public static final String USER_REGISTERED_SUCCESS = "User has been successfully registered";
 
+    public static final String USER_LOGIN_SUCCESS="User logged in successfully";
+
     public static final String SUCCESS_MESSAGE = "Successfully Done!";
 
     public static final String SUCCESSFUL_TRANSACTION = "004";
