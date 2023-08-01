@@ -17,8 +17,6 @@ import com.neoclan.identitymanagement.repository.UserRepository;
 import com.neoclan.identitymanagement.utils.ResponseUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -45,7 +42,6 @@ public class AuthServiceImpl implements AuthService {
     private PasswordEncoder passwordEncoder;
     private TokenRepository tokenRepository;
     private JwtService jwtService;
-    private WebClient webClientBuilder;
     private RabbitMQProducer rabbitMQProducer;
 
     @Override
