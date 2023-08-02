@@ -47,7 +47,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests((authorize) -> {
                     authorize
-                            .requestMatchers(HttpMethod.POST, "/api/v2/auth/**").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/v2/user/**").permitAll()
                             .requestMatchers( "/api/v2/user/**").permitAll()
                             .anyRequest().authenticated();
                 }).httpBasic(Customizer.withDefaults());

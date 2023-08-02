@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v2/user/")
+@RequestMapping("api/v2/user/kyc")
 @AllArgsConstructor
 public class IdentityController {
 
     private UserService userService;
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     public ResponseEntity<Response> updateSingleUserDetails(@PathVariable("id") Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto){
         return ResponseEntity.ok(userService.updateUserById(id, userUpdateRequestDto));
     }
