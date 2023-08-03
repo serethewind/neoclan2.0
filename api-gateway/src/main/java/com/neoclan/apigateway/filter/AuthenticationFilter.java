@@ -2,17 +2,14 @@ package com.neoclan.apigateway.filter;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
@@ -29,6 +26,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     @Override
     public GatewayFilter apply(Config config) {
         return ((exchange, chain) -> {
+            ServerHttpRequest user = null;
+
             if (routeValidator.isSecured.test(exchange.getRequest())) {
                 //if header does not contain the key 'Authorization'
                 if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
@@ -49,7 +48,10 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     //creating the token in the identity management service is the same secret used in validating.
                     //once token is valid, allow request to the corresponding micro-service
                     jwtService.validateToken(authHeader);
-                } catch  (ExpiredJwtException | MalformedJwtException | SecurityException | IllegalArgumentException e){
+
+                    user = exchange.getRequest().mutate().header("loggedInUser", jwtService.getUsername(authHeader)).build();
+
+                } catch (ExpiredJwtException | MalformedJwtException | SecurityException | IllegalArgumentException e) {
 //                    throw new RuntimeException(e);
 
                     ServerHttpResponse response = exchange.getResponse();
@@ -57,7 +59,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     return response.setComplete();
                 }
             }
-            return chain.filter(exchange);
+            return chain.filter(exchange.mutate().request(user).build());
         });
     }
 
