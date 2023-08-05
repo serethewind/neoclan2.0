@@ -196,7 +196,6 @@ public class TransactionServiceImpl implements TransactionService {
 //                .bodyToMono(Response.class)
 //                .block();
 
-
         Response response = identityServiceInterface.nameEnquiry(accountNumber).getBody();
 
         return UserInfo.builder()
@@ -207,23 +206,26 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void creditAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
-        webClientBuilder.build()
-                .post()
-                .uri("http://identity-management/api/v2/user/kyc/credit-and-update-accountBalance")
-                .body(BodyInserters.fromValue(userBalanceInfo))
-                .retrieve()
-                .bodyToMono(Response.class)
-                .block();
+//        webClientBuilder.build()
+//                .post()
+//                .uri("http://identity-management/api/v2/user/kyc/credit-and-update-accountBalance")
+//                .body(BodyInserters.fromValue(userBalanceInfo))
+//                .retrieve()
+//                .bodyToMono(Response.class)
+//                .block();
+//
+        identityServiceInterface.creditAndUpdateUserBalance(userBalanceInfo);
     }
 
     private void debitAndUpdateUserBalance(UserBalanceInfo userBalanceInfo) {
-        webClientBuilder.build()
-                .post()
-                .uri("http://identity-management/api/v2/user/kyc/debit-and-update-accountBalance")
-                .body(BodyInserters.fromValue(userBalanceInfo))
-                .retrieve()
-                .bodyToMono(Response.class)
-                .block();
+//        webClientBuilder.build()
+//                .post()
+//                .uri("http://identity-management/api/v2/user/kyc/debit-and-update-accountBalance")
+//                .body(BodyInserters.fromValue(userBalanceInfo))
+//                .retrieve()
+//                .bodyToMono(Response.class)
+//                .block();
+        identityServiceInterface.debitAndUpdateUserBalance(userBalanceInfo);
     }
 
 }
