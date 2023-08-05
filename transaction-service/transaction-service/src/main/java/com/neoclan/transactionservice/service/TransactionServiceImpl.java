@@ -1,5 +1,6 @@
 package com.neoclan.transactionservice.service;
 
+import com.neoclan.transactionservice.Config.IdentityServiceInterface;
 import com.neoclan.transactionservice.dto.*;
 import com.neoclan.transactionservice.dto.communication.UserBalanceInfo;
 import com.neoclan.transactionservice.dto.communication.UserInfo;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 public class TransactionServiceImpl implements TransactionService {
     private TransactionRepository transactionRepository;
     private WebClient.Builder webClientBuilder;
-//    private WebClient webClient;
+    private IdentityServiceInterface identityServiceInterface;
 
     @Override
     public Response debitRequest(TransactionRequest transactionRequest) {
@@ -188,13 +189,15 @@ public class TransactionServiceImpl implements TransactionService {
 
     private UserInfo retrieveUser(String accountNumber) {
 //        WebClient.Builder() is preferable for load balancing where the service in communication with has multiple instances
-        Response response = webClientBuilder.build().get()
-                .uri("http://identity-management/api/v2/user/kyc/retrieve-accountName",
-                        uriBuilder -> uriBuilder.queryParam("accountNumber", accountNumber).build())
-                .retrieve()
-                .bodyToMono(Response.class)
-                .block();
+//        Response response = webClientBuilder.build().get()
+//                .uri("http://identity-management/api/v2/user/kyc/retrieve-accountName",
+//                        uriBuilder -> uriBuilder.queryParam("accountNumber", accountNumber).build())
+//                .retrieve()
+//                .bodyToMono(Response.class)
+//                .block();
 
+
+        Response response = identityServiceInterface.nameEnquiry(accountNumber).getBody();
 
         return UserInfo.builder()
                 .accountName(response.getUserData().getAccountName())
