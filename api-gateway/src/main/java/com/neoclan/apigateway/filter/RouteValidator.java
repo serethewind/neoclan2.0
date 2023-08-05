@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 @Component
 public class RouteValidator {
 
-    //configure openEndpoints
+    //configure openEndpoints i.e. end points that will not require authentication with token
     public static final List<String> openApiEndpoints =
             List.of("/api/v2/user/auth/register", "/api/v2/user/auth/login");
 

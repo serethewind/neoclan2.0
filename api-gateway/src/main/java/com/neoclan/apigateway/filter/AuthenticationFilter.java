@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
     @Autowired
     private RouteValidator routeValidator;
-
     @Autowired
     private JwtService jwtService; //we will use the token-validate method of jwt service
 
@@ -46,7 +45,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
                     //Instance of jwtService with a validate method is also in the identity management service. note that the secret used in
                     //creating the token in the identity management service is the same secret used in validating.
-                    //once token is valid, allow request to the corresponding micro-service
+                    //once token is valid, allow request to the corresponding microservice
                     jwtService.validateToken(authHeader);
 
                     user = exchange.getRequest().mutate().header("loggedInUser", jwtService.getUsername(authHeader)).build();
