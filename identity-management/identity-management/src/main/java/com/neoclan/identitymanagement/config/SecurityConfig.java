@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
@@ -47,8 +48,8 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests((authorize) -> {
                     authorize
-                            .requestMatchers(HttpMethod.POST, "/api/v2/auth/**").permitAll()
-                            .requestMatchers( "/api/v2/user/**").permitAll()
+                            .requestMatchers("/api/v2/user/**").permitAll()
+//                            .requestMatchers( "/api/v2/user/**").permitAll()
                             .anyRequest().authenticated();
                 }).httpBasic(Customizer.withDefaults());
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
