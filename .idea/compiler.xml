@@ -15,20 +15,20 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="api-gateway" target="17" />
+      <module name="api-gateway" target="1.5" />
       <module name="identity-management" target="17" />
-      <module name="notification-service" target="17" />
+      <module name="notification-service" target="1.5" />
       <module name="service-registry" target="17" />
-      <module name="transaction-service" target="17" />
+      <module name="transaction-service" target="1.5" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="api-gateway" options="-parameters" />
+      <module name="api-gateway" options="" />
       <module name="identity-management" options="-parameters" />
-      <module name="notification-service" options="-parameters" />
+      <module name="notification-service" options="" />
       <module name="service-registry" options="-parameters" />
-      <module name="transaction-service" options="-parameters" />
+      <module name="transaction-service" options="" />
     </option>
   </component>
 </project>

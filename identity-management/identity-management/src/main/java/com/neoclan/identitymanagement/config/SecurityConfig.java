@@ -45,7 +45,13 @@ public class SecurityConfig {
 
                 .sessionManagement((sessionManagement) ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
+                .oauth2Login(oauth2login -> {
+                    try {
+                        oauth2login.configure(http);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .authorizeHttpRequests((authorize) -> {
                     authorize
                             .requestMatchers("/api/v2/user/**").permitAll()
